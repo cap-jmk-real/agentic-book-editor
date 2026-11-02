@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Agentic Book — design tokens (light default) */
+.book-editor {
+  --book-canvas: #ececee;
+  --book-page: #ffffff;
+  --book-page-shadow: 0 1px 3px rgb(24 24 27 / 6%), 0 8px 24px rgb(24 24 27 / 6%);
+  --book-text: #18181b;
+  --book-text-secondary: #3f3f46;
+  --book-text-muted: #52525b;
+  --book-text-faint: #71717a;
+  --book-border: #e4e4e7;
+  --book-border-strong: #d4d4d8;
+  --book-sidebar: #f4f4f5;
+  --book-sidebar-hover: #eaeaeb;
+  --book-accent: #1d4ed8;
+  --book-accent-hover: #1e40af;
+  --book-accent-subtle: #dbeafe;
+  --book-accent-text: #1e3a8a;
+  --book-success: #15803d;
+  --book-warning: #b45309;
+  --book-warning-bg: #fffbeb;
+  --book-danger: #b91c1c;
+  --book-chrome: #fafafa;
+  --book-prose-measure: 70ch;
+  --book-prose-size: 1.0625rem;
+  --book-prose-leading: 1.75;
+  --book-focus-ring: 0 0 0 2px var(--book-page), 0 0 0 4px var(--book-accent);
+}
+
+.book-editor[data-theme="dark"] {
+  --book-canvas: #121214;
+  --book-page: #1c1c1f;
+  --book-page-shadow: 0 1px 3px rgb(0 0 0 / 35%), 0 12px 32px rgb(0 0 0 / 25%);
+  --book-text: #f4f4f5;
+  --book-text-secondary: #e4e4e7;
+  --book-text-muted: #a1a1aa;
+  --book-text-faint: #71717a;
+  --book-border: #3f3f46;
+  --book-border-strong: #52525b;
+  --book-sidebar: #18181b;
+  --book-sidebar-hover: #27272a;
+  --book-accent: #60a5fa;
+  --book-accent-hover: #93c5fd;
+  --book-accent-subtle: rgb(37 99 235 / 18%);
+  --book-accent-text: #bfdbfe;
+  --book-success: #4ade80;
+  --book-warning: #fbbf24;
+  --book-warning-bg: rgb(251 191 36 / 10%);
+  --book-danger: #f87171;
+  --book-chrome: #18181b;
+  --book-focus-ring: 0 0 0 2px var(--book-page), 0 0 0 4px var(--book-accent);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--book-canvas);
+  --color-foreground: var(--book-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  margin: 0;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-body {
+/* Long-form prose (read mode) */
+.book-prose {
+  color: var(--book-text);
+  font-size: var(--book-prose-size);
+  line-height: var(--book-prose-leading);
+  max-width: var(--book-prose-measure);
+}
+
+.book-prose h2 {
+  color: var(--book-text);
+  font-size: 1.375rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  margin: 2rem 0 0.75rem;
+}
+
+.book-prose h2:first-child {
+  margin-top: 0;
+}
+
+.book-prose p {
+  margin: 0 0 1rem;
+  color: var(--book-text-secondary);
+}
+
+.book-prose pre {
+  background: var(--book-sidebar);
+  border: 1px solid var(--book-border);
+  border-radius: 0.5rem;
+  color: var(--book-text);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0 0 1.25rem;
+  overflow-x: auto;
+  padding: 0.875rem 1rem;
+}
+
+.book-editor[data-theme="dark"] .book-prose pre {
   background: #09090b;
-  color: #fafafa;
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.book-prose ul {
+  list-style: disc;
+  margin: 0 0 1rem;
+  padding-left: 1.35rem;
+  color: var(--book-text-secondary);
+}
+
+.book-prose li {
+  margin-bottom: 0.35rem;
 }
