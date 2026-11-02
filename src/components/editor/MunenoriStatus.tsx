@@ -31,24 +31,37 @@ export function MunenoriStatus() {
     return () => window.clearInterval(id);
   }, [refresh]);
 
-  const dot = status?.ok ? "bg-emerald-400" : "bg-amber-400";
+  const online = status?.ok;
 
   return (
-    <div className="flex items-center gap-2 text-xs text-zinc-400">
-      <span className={`h-2 w-2 rounded-full ${loading ? "animate-pulse bg-zinc-500" : dot}`} />
-      <span className="font-mono">
-        Munenori {status?.ok ? "online" : "offline"}
-        {status?.latencyMs != null && status.ok ? ` · ${status.latencyMs}ms` : ""}
+    <div
+      className="flex max-w-[14rem] items-center gap-2 text-xs sm:max-w-none"
+      style={{ color: "var(--book-text-muted)" }}
+    >
+      <span
+        className="h-2 w-2 shrink-0 rounded-full"
+        style={{
+          background: loading
+            ? "var(--book-text-faint)"
+            : online
+              ? "var(--book-success)"
+              : "var(--book-warning)",
+        }}
+      />
+      <span className="truncate font-medium" style={{ color: "var(--book-text-secondary)" }}>
+        Munenori {online ? "online" : "offline"}
+        {status?.latencyMs != null && online ? ` · ${status.latencyMs}ms` : ""}
       </span>
-      {!status?.ok && status?.error && (
-        <span className="truncate text-amber-200/80" title={status.error}>
+      {!online && status?.error && (
+        <span className="hidden truncate sm:inline" title={status.error} style={{ color: "var(--book-warning)" }}>
           ({status.error})
         </span>
       )}
       <button
         type="button"
         onClick={() => void refresh()}
-        className="ml-1 text-zinc-500 underline-offset-2 hover:text-zinc-300 hover:underline"
+        className="shrink-0 underline-offset-2 hover:underline"
+        style={{ color: "var(--book-text-faint)" }}
       >
         refresh
       </button>

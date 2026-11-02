@@ -12,9 +12,10 @@ type LanPayload = {
 type Props = {
   open: boolean;
   onClose: () => void;
+  theme?: "light" | "dark";
 };
 
-export function PhoneModal({ open, onClose }: Props) {
+export function PhoneModal({ open, onClose, theme = "light" }: Props) {
   const [lan, setLan] = useState<LanPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,30 +32,45 @@ export function PhoneModal({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="book-editor fixed inset-0 z-50 flex items-center justify-center p-4"
+      data-theme={theme}
+      style={{ background: "rgb(0 0 0 / 45%)" }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="phone-title"
+      onClick={onClose}
     >
-      <div className="w-full max-w-sm rounded-xl border border-zinc-700 bg-zinc-900 p-5 shadow-xl">
+      <div
+        className="w-full max-w-sm rounded-xl p-5 shadow-xl"
+        style={{
+          background: "var(--book-page)",
+          border: "1px solid var(--book-border-strong)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
-            <h2 id="phone-title" className="text-lg font-semibold text-zinc-100">
+            <h2 id="phone-title" className="text-lg font-semibold" style={{ color: "var(--book-text)" }}>
               Phone on Wi‑Fi
             </h2>
-            <p className="mt-1 text-sm text-zinc-400">
+            <p className="mt-1 text-sm leading-relaxed" style={{ color: "var(--book-text-muted)" }}>
               Same network as this Mac. Book data stays in each browser&apos;s storage.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-2 py-1 text-sm text-zinc-400 hover:bg-zinc-800"
+            className="rounded-md px-2 py-1 text-sm"
+            style={{ color: "var(--book-text-muted)" }}
           >
             Close
           </button>
         </div>
-        {error && <p className="text-sm text-amber-300">{error}</p>}
+        {error && (
+          <p className="text-sm" style={{ color: "var(--book-warning)" }}>
+            {error}
+          </p>
+        )}
         {lan && (
           <>
             {lan.qrDataUrl && (
@@ -64,7 +80,10 @@ export function PhoneModal({ open, onClose }: Props) {
                 className="mx-auto rounded-lg bg-white p-2"
               />
             )}
-            <p className="mt-3 break-all text-center font-mono text-sm text-violet-200">
+            <p
+              className="mt-3 break-all text-center font-mono text-sm"
+              style={{ color: "var(--book-accent-text)" }}
+            >
               {lan.url}
             </p>
           </>
