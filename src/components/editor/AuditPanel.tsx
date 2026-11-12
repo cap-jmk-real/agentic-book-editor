@@ -1,66 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { openFindingsForChapter, resolveFinding, severityLabel } from "@/lib/book/audit";
+import { openFindingsForChapter, severityLabel } from "@/lib/book/audit";
 import type { AuditFinding, AuditState, BookState } from "@/lib/book/types";
+import type { AiProposal } from "@/lib/editor/aiProposal";
 import { MunenoriChip } from "./MunenoriChip";
 
 type Props = {
   book: BookState;
   audit: AuditState;
-  onAuditChange: (audit: AuditState) => void;
-  onChapterBody: (chapterId: string, body: string) => void;
+  onRequestFix: (finding: AuditFinding) => void;
+  busyFindingId: string | null;
+  munenoriOnline: boolean;
   onClose?: () => void;
   showClose?: boolean;
+  activeProposal?: AiProposal | null;
 };
 
 export function AuditPanel({
   book,
   audit,
-  onAuditChange,
-  onChapterBody,
+  onRequestFix,
+  busyFindingId,
+  munenoriOnline,
   onClose,
   showClose,
 }: Props) {
   const chapterId = book.activeChapterId;
   const findings = openFindingsForChapter(audit, chapterId);
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  async function runMunenoriFix(finding: AuditFinding) {
-    const chapter = book.chapters.find((c) => c.id === chapterId);
-    if (!chapter) return;
-    setBusyId(finding.id);
-    setError(null);
-    try {
-      const res = await fetch("/api/llm/write", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode: "audit-fix",
-          chapterTitle: chapter.title,
-          body: chapter.body,
-          auditIssue: finding.issue,
-          auditExcerpt: finding.excerpt,
-        }),
-      });
-      const data = (await res.json()) as { text?: string; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Munenori failed");
-
-      let nextBody = chapter.body;
-      if (finding.excerpt && chapter.body.includes(finding.excerpt)) {
-        nextBody = chapter.body.replace(finding.excerpt, data.text ?? finding.excerpt);
-      } else if (data.text) {
-        nextBody = `${chapter.body}\n\n${data.text}\n`;
-      }
-      onChapterBody(chapterId, nextBody);
-      onAuditChange(resolveFinding(audit, finding.id));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Fix failed");
-    } finally {
-      setBusyId(null);
-    }
-  }
 
   return (
     <aside
@@ -69,16 +35,14 @@ export function AuditPanel({
         borderColor: "var(--book-border)",
         background: "var(--book-chrome)",
       }}
+      data-testid="audit-panel"
     >
       <header
         className="flex items-start justify-between gap-2 border-b px-4 py-3"
         style={{ borderColor: "var(--book-border)" }}
       >
         <div>
-          <h2
-            className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-            style={{ color: "var(--book-text-faint)" }}
-          >
+          <h2 className="text-xs font-medium" style={{ color: "var(--book-text-faint)" }}>
             Audit
           </h2>
           <p className="mt-1 text-sm" style={{ color: "var(--book-text-secondary)" }}>
@@ -93,7 +57,7 @@ export function AuditPanel({
             className="rounded-md px-2 py-1 text-xs font-medium lg:hidden"
             style={{ color: "var(--book-text-muted)" }}
           >
-            Hide
+            Close
           </button>
         )}
       </header>
@@ -113,9 +77,14 @@ export function AuditPanel({
             }}
           >
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <SeverityBadge severity={f.severity} />
+              <SeverityTick severity={f.severity} />
               {f.resolver === "munenori" && (
-                <MunenoriChip busy={busyId === f.id} onClick={() => void runMunenoriFix(f)} />
+                <MunenoriChip
+                  busy={busyFindingId === f.id}
+                  disabled={!munenoriOnline}
+                  onClick={() => onRequestFix(f)}
+                  label={munenoriOnline ? "Fix with Munenori" : "Munenori offline"}
+                />
               )}
             </div>
             <p style={{ color: "var(--book-text)" }}>{f.issue}</p>
@@ -131,41 +100,20 @@ export function AuditPanel({
           </li>
         ))}
       </ul>
-      {error && (
-        <p
-          className="border-t px-4 py-2 text-xs"
-          style={{ borderColor: "var(--book-border)", color: "var(--book-warning)" }}
-        >
-          {error}
-        </p>
-      )}
     </aside>
   );
 }
 
-function SeverityBadge({ severity }: { severity: AuditFinding["severity"] }) {
-  const label = severityLabel(severity);
-  const styles: Record<string, { bg: string; color: string }> = {
-    info: {
-      bg: "var(--book-accent-subtle)",
-      color: "var(--book-accent-text)",
-    },
-    warn: {
-      bg: "var(--book-warning-bg)",
-      color: "var(--book-warning)",
-    },
-    error: {
-      bg: "color-mix(in srgb, var(--book-danger) 12%, transparent)",
-      color: "var(--book-danger)",
-    },
+function SeverityTick({ severity }: { severity: AuditFinding["severity"] }) {
+  const colors: Record<string, string> = {
+    info: "var(--book-accent)",
+    warn: "var(--book-warning)",
+    error: "var(--book-danger)",
   };
-  const s = styles[severity] ?? styles.info;
   return (
-    <span
-      className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-      style={{ background: s.bg, color: s.color }}
-    >
-      {label}
+    <span className="inline-flex items-center gap-1.5 text-[11px]" style={{ color: "var(--book-text-muted)" }}>
+      <span className="h-2 w-2 rounded-full" style={{ background: colors[severity] }} aria-hidden />
+      {severityLabel(severity)}
     </span>
   );
 }

@@ -19,7 +19,12 @@ function writeJson(key: string, value: unknown) {
 
 export function loadBook(): BookState {
   const stored = readJson<BookState>(BOOK_STORAGE_KEY);
-  if (stored?.chapters?.length) return stored;
+  if (stored?.chapters?.length) {
+    return {
+      ...stored,
+      terms: stored.terms ?? [],
+    };
+  }
   const seed = seedBook();
   writeJson(BOOK_STORAGE_KEY, seed);
   return seed;

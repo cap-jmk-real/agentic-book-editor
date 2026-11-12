@@ -6,10 +6,28 @@ export type Chapter = {
   body: string;
 };
 
+export type TermSource = "manual" | "heuristic" | "llm";
+export type TermStatus = "accepted" | "suggested" | "rejected";
+
+export type TermRange = { start: number; end: number };
+
+export type GoDeeperTerm = {
+  id: string;
+  term: string;
+  normalized: string;
+  chapterId: ChapterId;
+  ranges: TermRange[];
+  explanation?: string;
+  source: TermSource;
+  status: TermStatus;
+  createdAt: string;
+};
+
 export type BookState = {
   title: string;
   chapters: Chapter[];
   activeChapterId: ChapterId;
+  terms: GoDeeperTerm[];
 };
 
 export type AuditSeverity = "info" | "warn" | "error";

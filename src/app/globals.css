@@ -23,8 +23,8 @@
   --book-danger: #b91c1c;
   --book-chrome: #fafafa;
   --book-prose-measure: 70ch;
-  --book-prose-size: 1.0625rem;
-  --book-prose-leading: 1.75;
+  --book-prose-size: 1.125rem;
+  --book-prose-leading: 1.7;
   --book-focus-ring: 0 0 0 2px var(--book-page), 0 0 0 4px var(--book-accent);
 }
 
@@ -116,4 +116,72 @@ body {
 
 .book-prose li {
   margin-bottom: 0.35rem;
+}
+
+.book-font,
+.book-prose {
+  font-family: var(--font-book), "Source Serif 4", Georgia, serif;
+}
+
+.book-icon-btn:focus-visible,
+.book-term:focus-visible,
+button[role="tab"]:focus-visible {
+  outline: none;
+  box-shadow: var(--book-focus-ring);
+}
+
+.book-term {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-bottom: 1px dotted color-mix(in srgb, var(--book-accent) 45%, transparent);
+  border-radius: 0;
+  line-height: inherit;
+}
+
+.book-term:hover,
+.book-term:focus-visible {
+  border-bottom-style: solid;
+}
+
+.book-term--suggested {
+  border-bottom-style: dashed;
+}
+
+.book-ai-diff-new {
+  background: color-mix(in srgb, var(--book-accent) 8%, var(--book-page));
+  border-left: 3px solid var(--book-accent);
+  color: var(--book-text-secondary);
+}
+
+.book-ai-diff-old {
+  color: var(--book-text-faint);
+  text-decoration: line-through;
+}
+
+.book-ai-proposal {
+  background: var(--book-sidebar);
+  border: 1px solid var(--book-border);
+}
+
+.book-format-toolbar {
+  min-height: 44px;
+}
+
+.book-page-card {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.book-selection-bubble .book-icon-btn {
+  border: none;
+  background: transparent;
+}
+
+.book-selection-bubble .book-icon-btn:hover {
+  background: var(--book-sidebar);
 }

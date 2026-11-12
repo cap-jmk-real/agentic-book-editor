@@ -32,7 +32,7 @@ export function severityLabel(severity: AuditFinding["severity"]): string {
     case "error":
       return "Error";
     case "warn":
-      return "Warn";
+      return "Warning";
     default:
       return "Info";
   }

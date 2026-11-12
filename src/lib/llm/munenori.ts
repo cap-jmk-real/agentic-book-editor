@@ -3,6 +3,18 @@ import type { LlmWriteRequest } from "./types";
 
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
+const VALID_MODES: LlmWriteRequest["mode"][] = [
+  "continue",
+  "audit-fix",
+  "rewrite-selection",
+  "explain-deeper",
+  "detect-terms",
+];
+
+export function isValidLlmMode(mode: string): mode is LlmWriteRequest["mode"] {
+  return (VALID_MODES as string[]).includes(mode);
+}
+
 function buildMessages(req: LlmWriteRequest): ChatMessage[] {
   const system =
     "You are Munenori, a careful book editor. Write clear technical prose in Markdown. " +
@@ -19,6 +31,59 @@ function buildMessages(req: LlmWriteRequest): ChatMessage[] {
             ? `Instruction: ${req.instruction}\n\n`
             : "Continue the chapter naturally for 2–4 paragraphs.\n\n") +
           `Manuscript so far:\n\n${req.body}\n\n---\nContinue from here:`,
+      },
+    ];
+  }
+
+  if (req.mode === "rewrite-selection") {
+    return [
+      { role: "system", content: system },
+      {
+        role: "user",
+        content:
+          `Chapter: ${req.chapterTitle}\n\n` +
+          (req.instruction ? `Instruction: ${req.instruction}\n\n` : "") +
+          `Full chapter:\n\n${req.body}\n\n---\nRewrite only this selection:\n\n${req.selectionText ?? ""}`,
+      },
+    ];
+  }
+
+  if (req.mode === "explain-deeper") {
+    return [
+      {
+        role: "system",
+        content:
+          "You explain difficult terms for book readers. Return 1–3 short paragraphs in the chapter's voice. No preamble.",
+      },
+      {
+        role: "user",
+        content:
+          `Chapter: ${req.chapterTitle}\n` +
+          `Term: ${req.term ?? ""}\n` +
+          (req.explanation ? `Author note: ${req.explanation}\n` : "") +
+          (req.surrounding ? `Context:\n${req.surrounding}\n` : "") +
+          `\nExplain "${req.term}" for a curious reader.`,
+      },
+    ];
+  }
+
+  if (req.mode === "detect-terms") {
+    return [
+      {
+        role: "system",
+        content:
+          "Identify difficult technical terms in the manuscript. Return ONLY a JSON array: " +
+          `[{ "term": string, "excerpt": string, "reason": string, "draftExplanation": string }] ` +
+          "No markdown fences, no commentary.",
+      },
+      {
+        role: "user",
+        content:
+          `Chapter: ${req.chapterTitle}\n\n` +
+          (req.knownTerms?.length
+            ? `Do not suggest these (already known): ${req.knownTerms.join(", ")}\n\n`
+            : "") +
+          `Manuscript:\n\n${req.body}`,
       },
     ];
   }
@@ -76,8 +141,8 @@ export async function munenoriComplete(req: LlmWriteRequest): Promise<string> {
     body: JSON.stringify({
       model: MUNENORI_MODEL,
       messages: buildMessages(req),
-      temperature: 0.4,
-      max_tokens: 1200,
+      temperature: req.mode === "detect-terms" ? 0.2 : 0.4,
+      max_tokens: req.mode === "detect-terms" ? 800 : 1200,
       stream: false,
     }),
     signal: AbortSignal.timeout(120_000),
