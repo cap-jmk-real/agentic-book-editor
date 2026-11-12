@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type LanPayload = {
@@ -51,23 +52,24 @@ export function PhoneModal({ open, onClose, theme = "light" }: Props) {
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
             <h2 id="phone-title" className="text-lg font-semibold" style={{ color: "var(--book-text)" }}>
-              Phone on Wi‑Fi
+              Open on this Wi‑Fi
             </h2>
             <p className="mt-1 text-sm leading-relaxed" style={{ color: "var(--book-text-muted)" }}>
-              Same network as this Mac. Book data stays in each browser&apos;s storage.
+              Same network as this machine. Book data stays in each browser&apos;s storage.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-2 py-1 text-sm"
+            className="book-icon-btn flex h-9 w-9 items-center justify-center rounded-md"
+            aria-label="Close"
             style={{ color: "var(--book-text-muted)" }}
           >
-            Close
+            <X size={18} strokeWidth={1.5} />
           </button>
         </div>
         {error && (
-          <p className="text-sm" style={{ color: "var(--book-warning)" }}>
+          <p className="text-sm" style={{ color: "var(--book-danger)" }}>
             {error}
           </p>
         )}
@@ -78,10 +80,11 @@ export function PhoneModal({ open, onClose, theme = "light" }: Props) {
                 src={lan.qrDataUrl}
                 alt="QR code to open editor on phone"
                 className="mx-auto rounded-lg bg-white p-2"
+                data-testid="phone-qr"
               />
             )}
             <p
-              className="mt-3 break-all text-center font-mono text-sm"
+              className="mt-3 select-all break-all text-center font-mono text-sm"
               style={{ color: "var(--book-accent-text)" }}
             >
               {lan.url}

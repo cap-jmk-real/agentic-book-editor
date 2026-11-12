@@ -1,4 +1,9 @@
-export type LlmWriteMode = "continue" | "audit-fix";
+export type LlmWriteMode =
+  | "continue"
+  | "audit-fix"
+  | "rewrite-selection"
+  | "explain-deeper"
+  | "detect-terms";
 
 export type LlmWriteRequest = {
   mode: LlmWriteMode;
@@ -7,6 +12,11 @@ export type LlmWriteRequest = {
   body: string;
   auditIssue?: string;
   auditExcerpt?: string;
+  selectionText?: string;
+  term?: string;
+  explanation?: string;
+  surrounding?: string;
+  knownTerms?: string[];
 };
 
 export type LlmStatus = {
@@ -16,4 +26,11 @@ export type LlmStatus = {
   models?: string[];
   error?: string;
   latencyMs?: number;
+};
+
+export type DetectTermsItem = {
+  term: string;
+  excerpt: string;
+  reason: string;
+  draftExplanation?: string;
 };

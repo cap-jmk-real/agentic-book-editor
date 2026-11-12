@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { munenoriComplete } from "@/lib/llm/munenori";
+import { isValidLlmMode, munenoriComplete } from "@/lib/llm/munenori";
 import type { LlmWriteRequest } from "@/lib/llm/types";
 
 export async function POST(request: Request) {
@@ -12,6 +12,10 @@ export async function POST(request: Request) {
 
   if (!body.chapterTitle || typeof body.body !== "string" || !body.mode) {
     return NextResponse.json({ error: "Missing chapterTitle, body, or mode" }, { status: 400 });
+  }
+
+  if (!isValidLlmMode(body.mode)) {
+    return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
   }
 
   try {

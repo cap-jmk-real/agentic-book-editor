@@ -1,17 +1,10 @@
-import type { AuditFinding, BookState } from "./types";
+import type { AuditFinding, BookState, GoDeeperTerm } from "./types";
+import { findTermRanges, normalizeTerm } from "./terms";
 
 export const BOOK_STORAGE_KEY = "agentic-book-editor:book";
 export const AUDIT_STORAGE_KEY = "agentic-book-editor:audit";
 
-export function seedBook(): BookState {
-  return {
-    title: "The Agentic Book",
-    activeChapterId: "ch-01",
-    chapters: [
-      {
-        id: "ch-01",
-        title: "Math essentials",
-        body: `## Why math matters
+const CH01_BODY = `## Why math matters
 
 Agents reason over vectors, probabilities, and gradients whether or not you print equations on the page. This chapter collects the minimum toolkit.
 
@@ -25,7 +18,37 @@ cos(θ) = (a · b) / (||a|| ||b||)
 
 Keep notation consistent: bold for vectors in prose, plain for scalars.
 
-`,
+`;
+
+function seedTerms(): GoDeeperTerm[] {
+  const createdAt = new Date().toISOString();
+  const items = [
+    { term: "cosine similarity", explanation: "A normalized dot product; 1 means same direction, 0 means orthogonal." },
+    { term: "dot product", explanation: "Sum of element-wise products; measures how much two vectors point the same way." },
+  ];
+  return items.map((item, i) => ({
+    id: `seed-term-${i + 1}`,
+    term: item.term,
+    normalized: normalizeTerm(item.term),
+    chapterId: "ch-01",
+    ranges: findTermRanges(CH01_BODY, item.term),
+    explanation: item.explanation,
+    source: "manual" as const,
+    status: "accepted" as const,
+    createdAt,
+  }));
+}
+
+export function seedBook(): BookState {
+  return {
+    title: "The Agentic Book",
+    activeChapterId: "ch-01",
+    terms: seedTerms(),
+    chapters: [
+      {
+        id: "ch-01",
+        title: "Math essentials",
+        body: CH01_BODY,
       },
       {
         id: "ch-02",

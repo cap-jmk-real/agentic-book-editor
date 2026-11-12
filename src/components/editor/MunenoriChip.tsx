@@ -1,20 +1,16 @@
+import { LoaderCircle } from "lucide-react";
+
 type Props = {
   onClick?: () => void;
   busy?: boolean;
   label?: string;
+  disabled?: boolean;
 };
 
-export function MunenoriChip({ onClick, busy, label = "Munenori" }: Props) {
-  const base =
-    "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium transition";
-  const style = {
-    color: "var(--book-accent-text)",
-    background: "var(--book-accent-subtle)",
-    border: "1px solid color-mix(in srgb, var(--book-accent) 35%, transparent)",
-  };
+export function MunenoriChip({ onClick, busy, label = "Fix with Munenori", disabled }: Props) {
   if (!onClick) {
     return (
-      <span className={base} style={style}>
+      <span className="text-xs font-medium" style={{ color: "var(--book-text-muted)" }}>
         {label}
       </span>
     );
@@ -23,11 +19,13 @@ export function MunenoriChip({ onClick, busy, label = "Munenori" }: Props) {
     <button
       type="button"
       onClick={onClick}
-      disabled={busy}
-      className={`${base} disabled:opacity-50`}
-      style={style}
+      disabled={busy || disabled}
+      className="inline-flex items-center gap-1 text-xs font-medium disabled:opacity-50"
+      style={{ color: "var(--book-accent-text)" }}
+      aria-busy={busy}
     >
-      {busy ? "…" : label}
+      {busy && <LoaderCircle size={12} className="animate-spin" aria-hidden />}
+      {label}
     </button>
   );
 }
